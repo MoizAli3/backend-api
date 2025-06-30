@@ -16,7 +16,7 @@ productRoute.post("/", upload.single("images"), handleCreateProduct);
 
 productRoute.get("/", handleGetAllProducts);
 productRoute.get("/:id", handleGetAllProductsById);
-productRoute.put("/:id", handleUpdateProductById);
+productRoute.patch("/:id", upload.single("images"), handleUpdateProductById);
 productRoute.delete("/:id", handleDeleteProductById);
 
 export const uploaded = upload;

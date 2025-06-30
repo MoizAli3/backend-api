@@ -29,7 +29,6 @@ const productValidationSchema = joi.object({
   discription: joi.string().required(),
 });
 
-
 export const handleCreateProduct = async (req, res) => {
   try {
     const { title, price, category, discription } = req.body;
@@ -91,31 +90,57 @@ export const handleGetAllProducts = async (req, res) => {
 export const handleGetAllProductsById = async (req, res) => {
   try {
     const id = req.params.id;
-    const getDbUser = await User.findById(id);
-    res.status(200).send({ getDbUser });
+    const getDbProduct = await Product.findById(id);
+    res.status(200).send({ getDbProduct });
   } catch (error) {
     res.status(500).send({ status: 500, message: "Internal Server Error!" });
   }
 };
 
 export const handleUpdateProductById = async (req, res) => {
-  const { username, email, password, phone } = req.body;
-
   try {
-    if (!username || !email || !password || !phone)
-      return res.status(400).send({ message: "please filled all field!" });
+    const { title, price, category, discription } = req.body;
     const id = req.params.id;
 
-    const updateUser = await User.findByIdAndUpdate(id, {
-      username,
-      email,
-      password,
-      phone,
-    });
+    await productValidationSchema.validateAsync(req.body);
 
-    res.status(200).send({
-      message: "User updated successfully!",
-      user: updateUser,
+    console.log(req.body);
+
+    fs.readdirSync("images/").forEach((file) => {
+      cloudinary.v2.uploader.upload(
+        `images/${file}`,
+        {},
+        async (error, result) => {
+          // Delete example_file.txt
+          fs.unlink(`images/${file}`, (err) => {
+            if (err) console.log(err);
+            else {
+              console.log("Success Uploaded");
+            }
+          });
+          if (error) {
+            return res
+              .status(401)
+              .send({ status: 401, message: "file not uploaded!", err: error });
+          }
+
+          const productData = await Product.findByIdAndUpdate(id, {
+            title,
+            price,
+            image: result.url,
+            category,
+            discription,
+          });
+
+          console.log(productData);
+
+          res.status(200).send({
+            status: 200,
+            message: "Product updated Succesully!",
+            data: productData,
+          });
+        }
+      );
     });
   } catch (error) {
     res.status(500).send({ status: 500, message: "Internal Server Error!" });
@@ -126,15 +151,17 @@ export const handleDeleteProductById = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedProduct = await Product.findByIdAndDelete(id);
 
-    if (!deletedUser) {
-      return res.status(404).json({ status: 404, message: "User not found!" });
+    if (!deletedProduct) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found!" });
     }
 
     res.status(200).send({
-      message: "User Deleted successfully!",
-      user: deletedUser,
+      message: "Product Deleted successfully!",
+      product: deletedProduct,
     });
   } catch (error) {
     res.status(500).send({ status: 500, message: "Internal Server Error!" });
