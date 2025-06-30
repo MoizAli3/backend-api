@@ -11,7 +11,6 @@ import {
 
 const productRoute = express.Router();
 
-
 productRoute.post("/", upload.single("images"), handleCreateProduct);
 
 productRoute.get("/", handleGetAllProducts);

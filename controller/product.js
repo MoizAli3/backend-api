@@ -4,11 +4,12 @@ import joi from "joi";
 import fs from "fs";
 import multer from "multer";
 import cloudinary from "cloudinary";
+import "dotenv/config";
 
 cloudinary.config({
-  cloud_name: "dkdqsi7sz",
-  api_key: "287921436345998",
-  api_secret: "iRIv38sJpHMATAj_6RaGcLV-a_k",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const storage = multer.diskStorage({
